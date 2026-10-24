@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LUDO SUPREME 3D — Official Championship Edition</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+</head>
+<body>
+
+  <!-- Fullscreen Confetti Particle Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Top Navigation Header -->
+  <header class="game-navbar">
+    <div class="brand-section">
+      <div class="brand-logo-icon">🎲</div>
+      <div>
+        <h1 class="brand-title">LUDO SUPREME</h1>
+      </div>
+    </div>
+
+    <!-- Live Game Toast Notification -->
+    <div class="navbar-center-toast" id="arena-live-toast">
+      <span class="toast-dot"></span>
+      <span class="toast-text">Game started! Player 1 (Red)'s turn.</span>
+    </div>
+
+    <div class="nav-actions">
+      <!-- Quick Theme Switcher -->
+      <div class="theme-button-group">
+        <button class="theme-btn active" data-theme="classic" title="Royal Classic Theme">Royal</button>
+        <button class="theme-btn" data-theme="neon" title="Cyber Neon Theme">Neon</button>
+        <button class="theme-btn" data-theme="wood" title="Vintage Wood Theme">Wood</button>
+      </div>
+
+      <!-- Quick Speed Switcher -->
+      <div class="speed-button-group">
+        <button class="speed-btn active" data-speed="1" title="Normal 1x Speed">1x</button>
+        <button class="speed-btn" data-speed="2" title="Fast 2x Speed">2x</button>
+        <button class="speed-btn" data-speed="3.5" title="Turbo Speed">Turbo</button>
+      </div>
+
+      <button class="btn-pill" id="sound-toggle-btn" title="Toggle Sound">
+        <span class="sound-icon">🔊</span>
+      </button>
+
+      <button class="btn-pill" id="history-toggle-btn" title="View Match Feed">
+        📜 Feed
+      </button>
+
+      <button class="btn-pill" id="rules-btn" title="Game Rules">
+        📖 Rules
+      </button>
+
+      <button class="btn-pill btn-primary" id="new-game-btn" title="Start a New Game">
+        ⚡ New Match
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Game Arena: Clean Symmetrical Layout -->
+  <main class="arena-container">
+
+    <!-- Left Column: Red (Top) & Blue (Bottom) -->
+    <aside class="players-column players-column-left">
+
+      <!-- Red Player Card (Top-Left) -->
+      <div class="player-card player-card-red" id="player-card-red">
+        <div class="player-card-header">
+          <div class="player-identity">
+            <div class="player-avatar-circle" style="background: var(--c-red);">R</div>
+            <div class="player-info-text">
+              <div class="player-card-name">Player 1 (Red)</div>
+              <span class="player-type-badge badge-human">👤 Human</span>
+            </div>
+          </div>
+          <span class="player-rank-badge" style="display: none;">#1</span>
+        </div>
+        <div class="player-progress-track">
+          <div class="player-progress-bar" style="background: var(--c-red);"></div>
+        </div>
+        <div class="player-card-footer">
+          <span class="player-home-count">0 / 4 Home</span>
+          <span class="player-home-dots">
+            <span class="dot-token"></span><span class="dot-token"></span><span class="dot-token"></span><span class="dot-token"></span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Blue Player Card (Bottom-Left) -->
+      <div class="player-card player-card-blue" id="player-card-blue">
+        <div class="player-card-header">
+          <div class="player-identity">
+            <div class="player-avatar-circle" style="background: var(--c-blue);">B</div>
+            <div class="player-info-text">
+              <div class="player-card-name">Bot Blue</div>
+              <span class="player-type-badge badge-bot">🤖 Bot</span>
+            </div>
+          </div>
+          <span class="player-rank-badge" style="display: none;">#1</span>
+        </div>
+        <div class="player-progress-track">
+          <div class="player-progress-bar" style="background: var(--c-blue);"></div>
+        </div>
+        <div class="player-card-footer">
+          <span class="player-home-count">0 / 4 Home</span>
+          <span class="player-home-dots">
+            <span class="dot-token"></span><span class="dot-token"></span><span class="dot-token"></span><span class="dot-token"></span>
+          </span>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Center Column: 15x15 Ludo Board & Dynamic Colored Dice Station -->
+    <section class="board-arena">
+
+      <!-- Minimal Turn Pill Banner -->
+      <div class="turn-banner" id="turn-banner-bar">
+        <span class="turn-label">Current Turn:</span>
+        <div class="turn-badge-pill" id="current-turn-badge" style="background: var(--c-red);">Player 1 (Red)'s Turn</div>
+      </div>
+
+      <!-- Responsive Ludo Board Container -->
+      <div class="board-wrapper" id="ludo-board">
+        <!-- SVG Board is rendered programmatically -->
+        <div id="pawns-layer">
+          <!-- Pawns are rendered programmatically -->
+        </div>
+      </div>
+
+      <!-- Dynamic Player Colored Dice Station -->
+      <div class="dice-station turn-red" id="dice-container" data-turn="red">
+        
+        <!-- Active Player Turn Info inside Dice Station -->
+        <div class="dice-player-info">
+          <div class="dice-player-avatar" id="dice-player-avatar" style="background: var(--c-red);">R</div>
+          <div class="dice-player-meta">
+            <div class="dice-player-name" id="dice-player-name">Player 1 (Red)</div>
+            <div class="dice-player-status" id="dice-player-status">Your turn to roll!</div>
+          </div>
+        </div>
+
+        <!-- 3D Dice Viewport with Holographic Pedestal -->
+        <div class="dice-viewport-wrapper">
+          <div class="dice-pedestal"></div>
+          <div class="dice-viewport" title="Click to Roll Dice">
+            <div class="dice-cube" id="dice-cube">
+              <!-- Face 1 -->
+              <div class="dice-face face-1">
+                <span class="pip"></span>
+              </div>
+              <!-- Face 2 -->
+              <div class="dice-face face-2">
+                <span class="pip"></span>
+                <span class="pip"></span>
+              </div>
+              <!-- Face 3 -->
+              <div class="dice-face face-3">
+                <span class="pip"></span>
+                <span class="pip"></span>
+                <span class="pip"></span>
+              </div>
+              <!-- Face 4 -->
+              <div class="dice-face face-4">
+                <span class="pip"></span>
+                <span class="pip"></span>
+                <span class="pip"></span>
+                <span class="pip"></span>
+              </div>
+              <!-- Face 5 -->
+              <div class="dice-face face-5">
+                <span class="pip"></span>
+                <span class="pip"></span>
+                <span class="pip"></span>
+                <span class="pip"></span>
+                <span class="pip"></span>
+              </div>
+              <!-- Face 6 -->
+              <div class="dice-face face-6">
+                <span class="pip"></span>
+                <span class="pip"></span>
+                <span class="pip"></span>
+                <span class="pip"></span>
+                <span class="pip"></span>
+                <span class="pip"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Roll Button with Spacebar trigger -->
+        <div class="dice-action-area">
+          <button class="btn-pill roll-btn-action ready-to-roll" id="roll-dice-btn">
+            <span class="btn-dice-icon">🎲</span> Roll Dice <kbd class="kbd-hint">Space</kbd>
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Right Column: Green (Top) & Yellow (Bottom) -->
+    <aside class="players-column players-column-right">
+
+      <!-- Green Player Card (Top-Right) -->
+      <div class="player-card player-card-green" id="player-card-green">
+        <div class="player-card-header">
+          <div class="player-identity">
+            <div class="player-avatar-circle" style="background: var(--c-green);">G</div>
+            <div class="player-info-text">
+              <div class="player-card-name">Bot Green</div>
+              <span class="player-type-badge badge-bot">🤖 Bot</span>
+            </div>
+          </div>
+          <span class="player-rank-badge" style="display: none;">#1</span>
+        </div>
+        <div class="player-progress-track">
+          <div class="player-progress-bar" style="background: var(--c-green);"></div>
+        </div>
+        <div class="player-card-footer">
+          <span class="player-home-count">0 / 4 Home</span>
+          <span class="player-home-dots">
+            <span class="dot-token"></span><span class="dot-token"></span><span class="dot-token"></span><span class="dot-token"></span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Yellow Player Card (Bottom-Right) -->
+      <div class="player-card player-card-yellow" id="player-card-yellow">
+        <div class="player-card-header">
+          <div class="player-identity">
+            <div class="player-avatar-circle" style="background: var(--c-yellow);">Y</div>
+            <div class="player-info-text">
+              <div class="player-card-name">Bot Yellow</div>
+              <span class="player-type-badge badge-bot">🤖 Bot</span>
+            </div>
+          </div>
+          <span class="player-rank-badge" style="display: none;">#1</span>
+        </div>
+        <div class="player-progress-track">
+          <div class="player-progress-bar" style="background: var(--c-yellow);"></div>
+        </div>
+        <div class="player-card-footer">
+          <span class="player-home-count">0 / 4 Home</span>
+          <span class="player-home-dots">
+            <span class="dot-token"></span><span class="dot-token"></span><span class="dot-token"></span><span class="dot-token"></span>
+          </span>
+        </div>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- Slide-out Match History Drawer (Keeps the main screen clean!) -->
+  <aside class="history-drawer-backdrop" id="history-drawer">
+    <div class="history-drawer-panel">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <span>📜 Match Feed</span>
+          <span class="badge-live-pulse">LIVE</span>
+        </div>
+        <button class="btn-close-modal" id="close-history-btn" title="Close Drawer">&times;</button>
+      </div>
+      <div class="logs-list" id="game-logs-list">
+        <!-- Real-time game events stream here -->
+      </div>
+    </div>
+  </aside>
+
+  <!-- Setup / New Match Modal -->
+  <div class="modal-backdrop" id="setup-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">⚡ Start New Match</h3>
+        <button class="btn-close-modal" id="close-setup-btn">&times;</button>
+      </div>
+
+      <form id="setup-game-form">
+        <!-- Number of Players -->
+        <div class="setup-group">
+          <label class="setup-label">Number of Players</label>
+          <div class="radio-pill-group">
+            <label class="radio-pill">
+              <input type="radio" name="player-count" value="2"> 2 Players
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="player-count" value="3"> 3 Players
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="player-count" value="4" checked> 4 Players
+            </label>
+          </div>
+        </div>
+
+        <!-- Game Mode -->
+        <div class="setup-group">
+          <label class="setup-label">Game Mode</label>
+          <div class="radio-pill-group">
+            <label class="radio-pill">
+              <input type="radio" name="game-mode" value="vs-computer" checked> 🤖 vs Computer
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="game-mode" value="pass-play"> 👥 Pass & Play
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="game-mode" value="spectate"> 🍿 Bot Spectator
+            </label>
+          </div>
+        </div>
+
+        <!-- Custom Player Names -->
+        <div class="setup-group">
+          <label class="setup-label">Player Names</label>
+          <div class="player-names-grid">
+            <div class="input-field-wrap">
+              <label style="color: var(--c-red);">Red Player</label>
+              <input type="text" class="input-text" id="name-red" value="Player 1" required>
+            </div>
+            <div class="input-field-wrap">
+              <label style="color: var(--c-green);">Green Player</label>
+              <input type="text" class="input-text" id="name-green" value="Bot Green">
+            </div>
+            <div class="input-field-wrap">
+              <label style="color: var(--c-yellow);">Yellow Player</label>
+              <input type="text" class="input-text" id="name-yellow" value="Bot Yellow">
+            </div>
+            <div class="input-field-wrap">
+              <label style="color: var(--c-blue);">Blue Player</label>
+              <input type="text" class="input-text" id="name-blue" value="Bot Blue">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-pill btn-primary" style="width: 100%; padding: 14px; font-size: 1rem; justify-content: center; margin-top: 10px;">
+          🎮 Launch Game
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Game Rules Modal -->
+  <div class="modal-backdrop" id="rules-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">📖 Official Ludo Rules</h3>
+        <button class="btn-close-modal" id="close-rules-btn">&times;</button>
+      </div>
+
+      <div class="rules-content">
+        <div class="rules-rule-item">
+          <h4>1. Releasing Tokens (Roll a 6)</h4>
+          <p>A pawn can only leave the base yard onto the starting cell when you roll a <strong>6</strong>.</p>
+        </div>
+
+        <div class="rules-rule-item">
+          <h4>2. Bonus Turns</h4>
+          <p>You earn an immediate extra roll whenever you:</p>
+          <ul style="padding-left: 20px; margin-top: 4px;">
+            <li>Roll a <strong>6</strong> (up to 2 times in a row).</li>
+            <li><strong>Capture</strong> an opponent's token.</li>
+            <li>Successfully guide a token into the <strong>HOME</strong> goal.</li>
+          </ul>
+        </div>
+
+        <div class="rules-rule-item">
+          <h4>3. Three Consecutive 6s Penalty</h4>
+          <p>Rolling three 6s in a row forfeits the third roll and your turn automatically passes to the next player.</p>
+        </div>
+
+        <div class="rules-rule-item">
+          <h4>4. Safe Zones (Stars & Starts)</h4>
+          <p>Tokens standing on <strong>Star cells (★)</strong> or on any player's <strong>Starting square</strong> are completely immune from capture!</p>
+        </div>
+
+        <div class="rules-rule-item">
+          <h4>5. Capturing Opponents</h4>
+          <p>Landing on an opponent's token on a normal (non-safe) square knocks it out, sending it back to their yard and granting you a bonus turn!</p>
+        </div>
+
+        <div class="rules-rule-item">
+          <h4>6. Reaching Home & Winning</h4>
+          <p>Tokens must complete the 52-step circuit and enter their color's home stretch. An exact roll is required to reach the center Home triangle (step 56). The first player to bring all 4 tokens Home wins 1st Place!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Victory & Celebration Modal -->
+  <div class="modal-backdrop" id="victory-modal">
+    <div class="modal-box">
+      <div class="victory-content">
+        <div class="trophy-emoji">🏆</div>
+        <h2 class="victory-title" id="victory-winner-name">Player 1 Wins!</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Outstanding game! Here is the final championship podium:</p>
+
+        <!-- Podium List -->
+        <div class="podium-list" id="victory-podium-list"></div>
+
+        <!-- Match Statistics -->
+        <div class="victory-stats-details" id="victory-stats-details"></div>
+
+        <button class="btn-pill btn-primary" id="victory-play-again-btn" style="padding: 12px 32px; font-size: 1rem; margin-top: 8px;">
+          🔄 Play Again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/audio.js"></script>
+  <script src="js/board-config.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
